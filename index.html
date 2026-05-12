@@ -178,17 +178,24 @@
         let aff=''; if(pct===100) aff='🌟 Sempurna! Kamu adalah master bendera ASEAN! 🏆'; else if(pct>=80) aff='🎯 Luar biasa! Kamu sangat menguasai bendera negara ASEAN! 💪✨'; else if(pct>=60) aff='👏 Bagus! Terus belajar dan kamu akan semakin mahir! 🚀'; else if(pct>=40) aff='💪 Lumayan! Semangat terus belajar bendera-bendera dunia! 🌍'; else aff='🌈 Jangan menyerah! Setiap percobaan adalah kesempatan untuk belajar lebih baik! 🎯';
         document.getElementById('affirmation').textContent=aff;
 
-        // === KIRIM KE GOOGLE SHEET === (ganti URL)
+        // === KIRIM KE GOOGLE SHEET ===
+        // Link ini memakai URL Apps Script yang sudah ada di kode kamu.
+        // Kalau kamu deploy Apps Script baru, ganti isi tanda kutip di bawah dengan Web App URL terbaru.
         const urlAppsScript = "https://script.google.com/macros/s/AKfycbyY6RGa36XmqYox3B5pQ03HJOVR3zs72d9eqiBCrsaMgIVUBB-Fk9XhBpkh35VEpzba/exec";
+
         fetch(urlAppsScript, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            mode: "no-cors",
+            headers: {
+                "Content-Type": "text/plain"
+            },
             body: JSON.stringify({
                 nama: namaVal,
                 jurusan: document.getElementById('jurusan').value.trim(),
                 angkatan: document.getElementById('angkatan').value.trim(),
-                skor: `${score}/${totalQuestions}`,
-                persen: `${pct}%`
+                benar: score,
+                salah: totalQuestions - score,
+                skor: `${score}/${totalQuestions}`
             })
         }).catch(err => console.error("Gagal kirim:", err));
 
