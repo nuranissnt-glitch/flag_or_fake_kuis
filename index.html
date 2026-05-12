@@ -50,6 +50,37 @@
     <span class="emoji-float" style="top: 75%; right: 18%;">🏁</span>
     <span class="emoji-float" style="top: 95%; left: 45%;">☀️</span>
     <div class="card max-w-2xl w-full p-8 relative z-10" id="quizContainer">
+        <div id="slide-admin" class="text-center">
+            <h1 class="text-4xl md:text-5xl font-bold text-center mb-2" style="color: #00A86B;">⚙️ Admin Setup 🎮</h1>
+            <p class="text-center text-gray-600 mb-6 text-lg">Atur koneksi ke Google Sheet untuk menyimpan hasil kuis</p>
+            <div class="space-y-5">
+                <div>
+                    <label class="block text-sm font-bold text-gray-800 mb-2">🔗 Google Apps Script URL</label>
+                    <input type="text" id="scriptUrl" class="w-full border-2 border-gray-300 rounded-xl px-4 py-3 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200 transition" placeholder="https://script.google.com/macros/s/...../exec">
+                    <p class="text-xs text-gray-500 mt-2">Paste URL dari Google Apps Script (Web App URL)</p>
+                </div>
+                <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded mb-4">
+                    <p class="text-sm text-blue-800"><strong>📝 Cara setup:</strong></p>
+                    <ol class="text-xs text-blue-700 mt-2 space-y-1 ml-4 list-decimal">
+                        <li>Buka Google Sheet kosong</li>
+                        <li>Ekstensi → Apps Script</li>
+                        <li>Copy-paste kode dari tombol "Lihat Kode" di bawah</li>
+                        <li>Deploy sebagai Web App, copy URL</li>
+                        <li>Paste URL di sini</li>
+                    </ol>
+                </div>
+                <button onclick="showScriptCode()" class="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold py-3 rounded-xl text-lg transition-all transform hover:scale-105 shadow-lg">📋 Lihat Kode Apps Script</button>
+                <button onclick="confirmSetup()" class="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-bold py-4 rounded-xl text-lg transition-all transform hover:scale-105 shadow-lg">✅ Simpan & Lanjut</button>
+                <button onclick="skipSetup()" class="w-full bg-gray-400 hover:bg-gray-500 text-white font-bold py-3 rounded-xl text-lg transition-all shadow-lg">⏭️ Skip (untuk test)</button>
+            </div>
+        </div>
+        <div id="slide-script-code" class="hidden max-h-96 overflow-y-auto">
+            <h2 class="text-2xl font-bold mb-4" style="color: #00A86B;">📋 Kode Google Apps Script</h2>
+            <p class="text-sm text-gray-600 mb-3">Copy seluruh kode ini ke Google Apps Script:</p>
+            <pre class="bg-gray-900 text-green-400 p-4 rounded-lg text-xs overflow-x-auto mb-4"><code id="codeSnippet"></code></pre>
+            <button onclick="copyToClipboard()" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 rounded-lg mb-3">📋 Copy Kode</button>
+            <button onclick="document.getElementById('slide-script-code').classList.add('hidden')" class="w-full bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 rounded-lg">Tutup</button>
+        </div>
         <div id="slide-register">
             <h1 class="text-4xl md:text-5xl font-bold text-center mb-2" style="color: #00A86B;">🏁 Flag or Fake 🏁</h1>
             <p class="text-center text-gray-600 mb-8 text-lg">Seberapa baik kamu mengenal bendera negara-negara ASEAN? 🌏✈️</p>
@@ -97,115 +128,283 @@
         philippines: 'https://flagcdn.com/w640/ph.png',
         indonesia: 'https://flagcdn.com/w640/id.png',
     };
-    const level1 = [
-        { flag: 'thailand', q: 'Bendera di atas berasal dari negara mana?', opts: ['Laos','Bangladesh','Myanmar','Thailand'], ans: 3 },
-        { flag: 'vietnam', q: 'Bendera di atas berasal dari negara mana?', opts: ['China','Maroko','Vietnam','Hongkong'], ans: 2 },
-        { flag: 'singapore', q: 'Bendera di atas berasal dari negara mana?', opts: ['Singapura','Turki','Malaysia','Austria'], ans: 0 },
-        { flag: 'cambodia', q: 'Bendera di atas berasal dari negara mana?', opts: ['Brunei Darussalam','Haiti','Timor Leste','Kamboja'], ans: 3 },
-        { flag: 'myanmar', q: 'Bendera di atas berasal dari negara mana?', opts: ['Ghana','Myanmar','Brunei Darussalam','Vietnam'], ans: 1 },
-        { flag: 'malaysia', q: 'Bendera di atas berasal dari negara mana?', opts: ['Singapura','Amerika Serikat','Malaysia','Filipina'], ans: 2 },
-        { flag: 'timorLeste', q: 'Bendera di atas berasal dari negara mana?', opts: ['Papua Nugini','Afrika Selatan','Mongolia','Timor Leste'], ans: 3 },
-        { flag: 'laos', q: 'Bendera di atas berasal dari negara mana?', opts: ['Kamboja','Taiwan','Laos','Korea Utara'], ans: 2 },
-        { flag: 'brunei', q: 'Bendera di atas berasal dari negara mana?', opts: ['Brunei Darussalam','Sri Lanka','Bhutan','Ukraina'], ans: 0 },
-        { flag: 'philippines', q: 'Bendera di atas berasal dari negara mana?', opts: ['Chili','Filipina','Myanmar','Kamboja'], ans: 1 },
-    ];
-    const level2 = [
-        { flags: ['indonesia','thailand','malaysia','singapore'], q: 'Negara manakah yang benderanya TIDAK termasuk dalam empat gambar di atas?', opts: ['Indonesia','Thailand','Malaysia','Vietnam'], ans: 3 },
-        { flags: ['brunei','laos','cambodia','thailand'], q: 'Negara manakah yang benderanya TIDAK termasuk dalam empat gambar di atas?', opts: ['Brunei Darussalam','Laos','Kamboja','Vietnam'], ans: 3 },
-        { flags: ['myanmar','singapore','timorLeste','malaysia'], q: 'Negara manakah yang benderanya TIDAK termasuk dalam empat gambar di atas?', opts: ['Myanmar','Singapura','Filipina','Timor Leste'], ans: 2 },
-        { flags: ['philippines','brunei','vietnam','laos'], q: 'Negara manakah yang benderanya TIDAK termasuk dalam empat gambar di atas?', opts: ['Filipina','Thailand','Brunei Darussalam','Vietnam'], ans: 1 },
-        { flags: ['malaysia','singapore','thailand','philippines'], q: 'Negara manakah yang benderanya TIDAK termasuk dalam empat gambar di atas?', opts: ['Indonesia','Singapura','Thailand','Malaysia'], ans: 0 },
-        { flags: ['laos','indonesia','thailand','cambodia'], q: 'Negara manakah yang benderanya TIDAK termasuk dalam empat gambar di atas?', opts: ['Thailand','Laos','Myanmar','Indonesia'], ans: 2 },
-        { flags: ['vietnam','philippines','singapore','timorLeste'], q: 'Negara manakah yang benderanya TIDAK termasuk dalam empat gambar di atas?', opts: ['Timor Leste','Vietnam','Filipina','Myanmar'], ans: 3 },
-        { flags: ['malaysia','singapore','thailand','laos'], q: 'Negara manakah yang benderanya TIDAK termasuk dalam empat gambar di atas?', opts: ['Singapura','Indonesia','Malaysia','Thailand'], ans: 1 },
-        { flags: ['indonesia','myanmar','cambodia','brunei'], q: 'Negara manakah yang benderanya TIDAK termasuk dalam empat gambar di atas?', opts: ['Vietnam','Indonesia','Myanmar','Kamboja'], ans: 0 },
-        { flags: ['laos','brunei','timorLeste','vietnam'], q: 'Negara manakah yang benderanya TIDAK termasuk dalam empat gambar di atas?', opts: ['Laos','Brunei Darussalam','Thailand','Timor Leste'], ans: 2 },
-        { flags: ['thailand','malaysia','vietnam','singapore'], q: 'Negara manakah yang benderanya TIDAK termasuk dalam empat gambar di atas?', opts: ['Thailand','Malaysia','Laos','Vietnam'], ans: 2 },
-        { flags: ['myanmar','indonesia','philippines','timorLeste'], q: 'Negara manakah yang benderanya TIDAK termasuk dalam empat gambar di atas?', opts: ['Thailand','Myanmar','Filipina','Indonesia'], ans: 0 },
-        { flags: ['brunei','laos','vietnam','malaysia'], q: 'Negara manakah yang benderanya TIDAK termasuk dalam empat gambar di atas?', opts: ['Brunei Darussalam','Laos','Vietnam','Kamboja'], ans: 3 },
-        { flags: ['singapore','thailand','cambodia','indonesia'], q: 'Negara manakah yang benderanya TIDAK termasuk dalam empat gambar di atas?', opts: ['Singapura','Brunei Darussalam','Kamboja','Thailand'], ans: 1 },
-        { flags: ['myanmar','malaysia','philippines','brunei'], q: 'Negara manakah yang benderanya TIDAK termasuk dalam empat gambar di atas?', opts: ['Myanmar','Malaysia','Filipina','Timor Leste'], ans: 3 },
-    ];
-    const level3 = [
-        { flags: ['indonesia','thailand','vietnam','philippines'], q: 'Manakah urutan yang BENAR sesuai gambar di atas?', opts: ['Indonesia – Thailand – Vietnam – Filipina','Thailand – Indonesia – Vietnam – Filipina','Indonesia – Vietnam – Thailand – Filipina','Filipina – Indonesia – Thailand – Vietnam'], ans: 0 },
-        { flags: ['vietnam','philippines','thailand','indonesia'], q: 'Manakah urutan yang BENAR sesuai gambar di atas?', opts: ['Vietnam, Filipina, Thailand, Indonesia','Kamboja, Filipina, Laos, Indonesia','Vietnam, Malaysia, Thailand, Monako','Myanmar, Filipina, Thailand, Indonesia'], ans: 0 },
-        { flags: ['thailand','vietnam','malaysia','singapore'], q: 'Manakah urutan yang BENAR sesuai gambar di atas?', opts: ['Kamboja, Vietnam, Filipina, Singapura','Thailand, Laos, Malaysia, Indonesia','Thailand, Vietnam, Malaysia, Singapura','Thailand, Myanmar, Indonesia, Singapura'], ans: 2 },
-        { flags: ['brunei','cambodia','myanmar','laos'], q: 'Manakah urutan yang BENAR sesuai gambar di atas?', opts: ['Brunei Darussalam, Laos, Myanmar, Kamboja','Malaysia, Kamboja, Vietnam, Laos','Brunei Darussalam, Kamboja, Myanmar, Laos','Timor Leste, Kamboja, Myanmar, Thailand'], ans: 2 },
-        { flags: ['timorLeste','philippines','vietnam','cambodia'], q: 'Manakah urutan yang BENAR sesuai gambar di atas?', opts: ['Timor Leste, Filipina, Vietnam, Kamboja','Myanmar, Filipina, Thailand, Kamboja','Timor Leste, Indonesia, Vietnam, Laos','Papua Nugini, Filipina, Laos, Kamboja'], ans: 0 },
-        { flags: ['laos','brunei','singapore','malaysia'], q: 'Manakah urutan yang BENAR sesuai gambar di atas?', opts: ['Kamboja, Brunei Darussalam, Indonesia, Malaysia','Laos, Brunei Darussalam, Singapura, Malaysia','Thailand, Brunei Darussalam, Singapura, Filipina','Laos, Malaysia, Singapura, Brunei Darussalam'], ans: 1 },
-        { flags: ['myanmar','laos','timorLeste','brunei'], q: 'Manakah urutan yang BENAR sesuai gambar di atas?', opts: ['Vietnam, Laos, Timor Leste, Kamboja','Myanmar, Laos, Timor Leste, Brunei Darussalam','Myanmar, Thailand, Timor Leste, Brunei Darussalam','Kamboja, Laos, Filipina, Brunei Darussalam'], ans: 1 },
-        { flags: ['cambodia','timorLeste','laos','vietnam'], q: 'Manakah urutan yang BENAR sesuai gambar di atas?', opts: ['Kamboja, Timor Leste, Laos, Vietnam','Thailand, Timor Leste, Myanmar, Vietnam','Kamboja, Filipina, Laos, Myanmar','Laos, Timor Leste, Kamboja, Vietnam'], ans: 0 },
-        { flags: ['brunei','myanmar','cambodia','philippines'], q: 'Manakah urutan yang BENAR sesuai gambar di atas?', opts: ['Brunei Darussalam, Thailand, Kamboja, Malaysia','Timor Leste, Myanmar, Kamboja, Filipina','Brunei Darussalam, Myanmar, Kamboja, Filipina','Brunei Darussalam, Laos, Thailand, Filipina'], ans: 2 },
-        { flags: ['laos','myanmar','timorLeste','cambodia'], q: 'Manakah urutan yang BENAR sesuai gambar di atas?', opts: ['Vietnam, Myanmar, Filipina, Kamboja','Laos, Myanmar, Timor Leste, Kamboja','Thailand, Myanmar, Timor Leste, Laos','Laos, Vietnam, Timor Leste, Kamboja'], ans: 1 },
-        { flags: ['singapore','indonesia','philippines','malaysia'], q: 'Manakah urutan yang BENAR sesuai gambar di atas?', opts: ['Singapura, Indonesia, Thailand, Malaysia','Singapura, Indonesia, Filipina, Malaysia','Indonesia, Singapura, Filipina, Malaysia','Singapura, Monako, Filipina, Brunei Darussalam'], ans: 1 },
-        { flags: ['timorLeste','myanmar','vietnam','cambodia'], q: 'Manakah urutan yang BENAR sesuai gambar di atas?', opts: ['Timor Leste, Myanmar, Vietnam, Kamboja','Filipina, Myanmar, Vietnam, Kamboja','Timor Leste, Laos, Vietnam, Kamboja','Papua Nugini, Myanmar, Vietnam, Thailand'], ans: 0 },
-        { flags: ['laos','thailand','cambodia','vietnam'], q: 'Manakah urutan yang BENAR sesuai gambar di atas?', opts: ['Thailand, Laos, Kamboja, Vietnam','Laos, Thailand, Myanmar, Vietnam','Laos, Thailand, Kamboja, Vietnam','Kamboja, Thailand, Laos, Vietnam'], ans: 2 },
-        { flags: ['brunei','timorLeste','philippines','myanmar'], q: 'Manakah urutan yang BENAR sesuai gambar di atas?', opts: ['Brunei Darussalam, Timor Leste, Filipina, Vietnam','Brunei Darussalam, Filipina, Timor Leste, Myanmar','Malaysia, Timor Leste, Filipina, Myanmar','Brunei Darussalam, Timor Leste, Filipina, Myanmar'], ans: 3 },
-        { flags: ['myanmar','laos','thailand','vietnam'], q: 'Manakah urutan yang BENAR sesuai gambar di atas?', opts: ['Myanmar, Laos, Thailand, Vietnam','Vietnam, Laos, Thailand, Myanmar','Myanmar, Kamboja, Thailand, Vietnam','Laos, Myanmar, Thailand, Vietnam'], ans: 0 },
-    ];
+
+    // Google Apps Script Code untuk copy-paste
+    const appsScriptCode = `function doPost(e) {
+  const sheet = SpreadsheetApp.getActiveSheet();
+  const data = JSON.parse(e.postData.contents);
+  
+  // Pastikan header ada
+  const headerRow = sheet.getRange(1, 1, 1, 7).getValues()[0];
+  if (!headerRow[0] || headerRow[0] === '') {
+    sheet.getRange(1, 1, 1, 7).setValues([['Nama Lengkap', 'Jurusan', 'Angkatan', 'Total soal benar', 'Total soal salah', 'Skor', 'Waktu']]);
+  }
+  
+  sheet.appendRow([
+    data.nama,
+    data.jurusan,
+    data.angkatan,
+    data.benar,
+    data.salah,
+    data.skor,
+    new Date().toLocaleString('id-ID')
+  ]);
+  
+  return ContentService.createTextOutput(JSON.stringify({status: 'success', message: 'Data tersimpan'})).setMimeType(ContentService.MimeType.JSON);
+}`;
+
     let currentLevel = 1, currentQ = 0, score = 0, wrongList = [], allQuestions = [], answered = false;
-    const totalQuestions = level1.length + level2.length + level3.length;
-    function showSlide(id) { document.querySelectorAll('[id^="slide-"]').forEach(el => el.classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); }
-    function startQuiz() { if (!nama.value.trim() || !jurusan.value.trim() || !angkatan.value.trim()) { alert('Mohon isi semua data.'); return; } currentLevel=1; score=0; wrongList=[]; showLevelSplash(); }
-    function showLevelSplash() { const descs = ['🏳️ Tebak bendera negara dengan tepat!','🔍 Temukan bendera yang TIDAK ada di gambar!','📋 Urutkan bendera sesuai urutan gambar!']; document.getElementById('levelTitle').textContent=`Level ${currentLevel}`; document.getElementById('levelDesc').textContent=descs[currentLevel-1]; showSlide('slide-level'); }
-    function startLevel() { if(currentLevel===1) allQuestions=[...level1]; else if(currentLevel===2) allQuestions=[...level2]; else allQuestions=[...level3]; currentQ=0; showQuestion(); }
+    let startTime = 0;
+    let appsScriptUrl = localStorage.getItem('appsScriptUrl') || '';
+    const totalQuestions = 40;
+
+    function showSlide(id) { 
+        document.querySelectorAll('[id^="slide-"]').forEach(el => el.classList.add('hidden')); 
+        document.getElementById(id).classList.remove('hidden'); 
+    }
+
+    function showScriptCode() {
+        document.getElementById('codeSnippet').textContent = appsScriptCode;
+        document.getElementById('slide-script-code').classList.remove('hidden');
+    }
+
+    function copyToClipboard() {
+        navigator.clipboard.writeText(appsScriptCode).then(() => {
+            alert('✅ Kode berhasil dicopy!');
+        });
+    }
+
+    function confirmSetup() {
+        const url = document.getElementById('scriptUrl').value.trim();
+        if (!url) {
+            alert('⚠️ Mohon isi URL Google Apps Script terlebih dahulu!');
+            return;
+        }
+        if (!url.includes('script.google.com')) {
+            alert('⚠️ URL tidak valid! Pastikan dari script.google.com');
+            return;
+        }
+        localStorage.setItem('appsScriptUrl', url);
+        appsScriptUrl = url;
+        alert('✅ Setup berhasil! URL tersimpan.');
+        showSlide('slide-register');
+    }
+
+    function skipSetup() {
+        appsScriptUrl = '';
+        localStorage.removeItem('appsScriptUrl');
+        showSlide('slide-register');
+    }
+
+    function startQuiz() { 
+        if (!nama.value.trim() || !jurusan.value.trim() || !angkatan.value.trim()) { 
+            alert('Mohon isi semua data.'); 
+            return; 
+        } 
+        currentLevel = 1; 
+        score = 0; 
+        wrongList = []; 
+        startTime = Date.now();
+        showLevelSplash(); 
+    }
+
+    function showLevelSplash() { 
+        const descs = ['🏳️ Tebak bendera negara dengan tepat!','🔍 Temukan bendera yang TIDAK ada di gambar!','📋 Urutkan bendera sesuai urutan gambar!']; 
+        document.getElementById('levelTitle').textContent = `Level ${currentLevel}`; 
+        document.getElementById('levelDesc').textContent = descs[currentLevel-1]; 
+        showSlide('slide-level'); 
+    }
+
+    function startLevel() { 
+        const level1 = [
+            { flag: 'thailand', q: 'Bendera di atas berasal dari negara mana?', opts: ['Laos','Bangladesh','Myanmar','Thailand'], ans: 3 },
+            { flag: 'vietnam', q: 'Bendera di atas berasal dari negara mana?', opts: ['China','Maroko','Vietnam','Hongkong'], ans: 2 },
+            { flag: 'singapore', q: 'Bendera di atas berasal dari negara mana?', opts: ['Singapura','Turki','Malaysia','Austria'], ans: 0 },
+            { flag: 'cambodia', q: 'Bendera di atas berasal dari negara mana?', opts: ['Brunei Darussalam','Haiti','Timor Leste','Kamboja'], ans: 3 },
+            { flag: 'myanmar', q: 'Bendera di atas berasal dari negara mana?', opts: ['Ghana','Myanmar','Brunei Darussalam','Vietnam'], ans: 1 },
+            { flag: 'malaysia', q: 'Bendera di atas berasal dari negara mana?', opts: ['Singapura','Amerika Serikat','Malaysia','Filipina'], ans: 2 },
+            { flag: 'timorLeste', q: 'Bendera di atas berasal dari negara mana?', opts: ['Papua Nugini','Afrika Selatan','Mongolia','Timor Leste'], ans: 3 },
+            { flag: 'laos', q: 'Bendera di atas berasal dari negara mana?', opts: ['Kamboja','Taiwan','Laos','Korea Utara'], ans: 2 },
+            { flag: 'brunei', q: 'Bendera di atas berasal dari negara mana?', opts: ['Brunei Darussalam','Sri Lanka','Bhutan','Ukraina'], ans: 0 },
+            { flag: 'philippines', q: 'Bendera di atas berasal dari negara mana?', opts: ['Chili','Filipina','Myanmar','Kamboja'], ans: 1 },
+        ];
+        const level2 = [
+            { flags: ['indonesia','thailand','malaysia','singapore'], q: 'Negara manakah yang benderanya TIDAK termasuk dalam empat gambar di atas?', opts: ['Indonesia','Thailand','Malaysia','Vietnam'], ans: 3 },
+            { flags: ['brunei','laos','cambodia','thailand'], q: 'Negara manakah yang benderanya TIDAK termasuk dalam empat gambar di atas?', opts: ['Brunei Darussalam','Laos','Kamboja','Vietnam'], ans: 3 },
+            { flags: ['myanmar','singapore','timorLeste','malaysia'], q: 'Negara manakah yang benderanya TIDAK termasuk dalam empat gambar di atas?', opts: ['Myanmar','Singapura','Filipina','Timor Leste'], ans: 2 },
+            { flags: ['philippines','brunei','vietnam','laos'], q: 'Negara manakah yang benderanya TIDAK termasuk dalam empat gambar di atas?', opts: ['Filipina','Thailand','Brunei Darussalam','Vietnam'], ans: 1 },
+            { flags: ['malaysia','singapore','thailand','philippines'], q: 'Negara manakah yang benderanya TIDAK termasuk dalam empat gambar di atas?', opts: ['Indonesia','Singapura','Thailand','Malaysia'], ans: 0 },
+            { flags: ['laos','indonesia','thailand','cambodia'], q: 'Negara manakah yang benderanya TIDAK termasuk dalam empat gambar di atas?', opts: ['Thailand','Laos','Myanmar','Indonesia'], ans: 2 },
+            { flags: ['vietnam','philippines','singapore','timorLeste'], q: 'Negara manakah yang benderanya TIDAK termasuk dalam empat gambar di atas?', opts: ['Timor Leste','Vietnam','Filipina','Myanmar'], ans: 3 },
+            { flags: ['malaysia','singapore','thailand','laos'], q: 'Negara manakah yang benderanya TIDAK termasuk dalam empat gambar di atas?', opts: ['Singapura','Indonesia','Malaysia','Thailand'], ans: 1 },
+            { flags: ['indonesia','myanmar','cambodia','brunei'], q: 'Negara manakah yang benderanya TIDAK termasuk dalam empat gambar di atas?', opts: ['Vietnam','Indonesia','Myanmar','Kamboja'], ans: 0 },
+            { flags: ['laos','brunei','timorLeste','vietnam'], q: 'Negara manakah yang benderanya TIDAK termasuk dalam empat gambar di atas?', opts: ['Laos','Brunei Darussalam','Thailand','Timor Leste'], ans: 2 },
+            { flags: ['thailand','malaysia','vietnam','singapore'], q: 'Negara manakah yang benderanya TIDAK termasuk dalam empat gambar di atas?', opts: ['Thailand','Malaysia','Laos','Vietnam'], ans: 2 },
+            { flags: ['myanmar','indonesia','philippines','timorLeste'], q: 'Negara manakah yang benderanya TIDAK termasuk dalam empat gambar di atas?', opts: ['Thailand','Myanmar','Filipina','Indonesia'], ans: 0 },
+            { flags: ['brunei','laos','vietnam','malaysia'], q: 'Negara manakah yang benderanya TIDAK termasuk dalam empat gambar di atas?', opts: ['Brunei Darussalam','Laos','Vietnam','Kamboja'], ans: 3 },
+            { flags: ['singapore','thailand','cambodia','indonesia'], q: 'Negara manakah yang benderanya TIDAK termasuk dalam empat gambar di atas?', opts: ['Singapura','Brunei Darussalam','Kamboja','Thailand'], ans: 1 },
+            { flags: ['myanmar','malaysia','philippines','brunei'], q: 'Negara manakah yang benderanya TIDAK termasuk dalam empat gambar di atas?', opts: ['Myanmar','Malaysia','Filipina','Timor Leste'], ans: 3 },
+        ];
+        const level3 = [
+            { flags: ['indonesia','thailand','vietnam','philippines'], q: 'Manakah urutan yang BENAR sesuai gambar di atas?', opts: ['Indonesia – Thailand – Vietnam – Filipina','Thailand – Indonesia – Vietnam – Filipina','Indonesia – Vietnam – Thailand – Filipina','Filipina – Indonesia – Thailand – Vietnam'], ans: 0 },
+            { flags: ['vietnam','philippines','thailand','indonesia'], q: 'Manakah urutan yang BENAR sesuai gambar di atas?', opts: ['Vietnam, Filipina, Thailand, Indonesia','Kamboja, Filipina, Laos, Indonesia','Vietnam, Malaysia, Thailand, Monako','Myanmar, Filipina, Thailand, Indonesia'], ans: 0 },
+            { flags: ['thailand','vietnam','malaysia','singapore'], q: 'Manakah urutan yang BENAR sesuai gambar di atas?', opts: ['Kamboja, Vietnam, Filipina, Singapura','Thailand, Laos, Malaysia, Indonesia','Thailand, Vietnam, Malaysia, Singapura','Thailand, Myanmar, Indonesia, Singapura'], ans: 2 },
+            { flags: ['brunei','cambodia','myanmar','laos'], q: 'Manakah urutan yang BENAR sesuai gambar di atas?', opts: ['Brunei Darussalam, Laos, Myanmar, Kamboja','Malaysia, Kamboja, Vietnam, Laos','Brunei Darussalam, Kamboja, Myanmar, Laos','Timor Leste, Kamboja, Myanmar, Thailand'], ans: 2 },
+            { flags: ['timorLeste','philippines','vietnam','cambodia'], q: 'Manakah urutan yang BENAR sesuai gambar di atas?', opts: ['Timor Leste, Filipina, Vietnam, Kamboja','Myanmar, Filipina, Thailand, Kamboja','Timor Leste, Indonesia, Vietnam, Laos','Papua Nugini, Filipina, Laos, Kamboja'], ans: 0 },
+            { flags: ['laos','brunei','singapore','malaysia'], q: 'Manakah urutan yang BENAR sesuai gambar di atas?', opts: ['Kamboja, Brunei Darussalam, Indonesia, Malaysia','Laos, Brunei Darussalam, Singapura, Malaysia','Thailand, Brunei Darussalam, Singapura, Filipina','Laos, Malaysia, Singapura, Brunei Darussalam'], ans: 1 },
+            { flags: ['myanmar','laos','timorLeste','brunei'], q: 'Manakah urutan yang BENAR sesuai gambar di atas?', opts: ['Vietnam, Laos, Timor Leste, Kamboja','Myanmar, Laos, Timor Leste, Brunei Darussalam','Myanmar, Thailand, Timor Leste, Brunei Darussalam','Kamboja, Laos, Filipina, Brunei Darussalam'], ans: 1 },
+            { flags: ['cambodia','timorLeste','laos','vietnam'], q: 'Manakah urutan yang BENAR sesuai gambar di atas?', opts: ['Kamboja, Timor Leste, Laos, Vietnam','Thailand, Timor Leste, Myanmar, Vietnam','Kamboja, Filipina, Laos, Myanmar','Laos, Timor Leste, Kamboja, Vietnam'], ans: 0 },
+            { flags: ['brunei','myanmar','cambodia','philippines'], q: 'Manakah urutan yang BENAR sesuai gambar di atas?', opts: ['Brunei Darussalam, Thailand, Kamboja, Malaysia','Timor Leste, Myanmar, Kamboja, Filipina','Brunei Darussalam, Myanmar, Kamboja, Filipina','Brunei Darussalam, Laos, Thailand, Filipina'], ans: 2 },
+            { flags: ['laos','myanmar','timorLeste','cambodia'], q: 'Manakah urutan yang BENAR sesuai gambar di atas?', opts: ['Vietnam, Myanmar, Filipina, Kamboja','Laos, Myanmar, Timor Leste, Kamboja','Thailand, Myanmar, Timor Leste, Laos','Laos, Vietnam, Timor Leste, Kamboja'], ans: 1 },
+            { flags: ['singapore','indonesia','philippines','malaysia'], q: 'Manakah urutan yang BENAR sesuai gambar di atas?', opts: ['Singapura, Indonesia, Thailand, Malaysia','Singapura, Indonesia, Filipina, Malaysia','Indonesia, Singapura, Filipina, Malaysia','Singapura, Monako, Filipina, Brunei Darussalam'], ans: 1 },
+            { flags: ['timorLeste','myanmar','vietnam','cambodia'], q: 'Manakah urutan yang BENAR sesuai gambar di atas?', opts: ['Timor Leste, Myanmar, Vietnam, Kamboja','Filipina, Myanmar, Vietnam, Kamboja','Timor Leste, Laos, Vietnam, Kamboja','Papua Nugini, Myanmar, Vietnam, Thailand'], ans: 0 },
+            { flags: ['laos','thailand','cambodia','vietnam'], q: 'Manakah urutan yang BENAR sesuai gambar di atas?', opts: ['Thailand, Laos, Kamboja, Vietnam','Laos, Thailand, Myanmar, Vietnam','Laos, Thailand, Kamboja, Vietnam','Kamboja, Thailand, Laos, Vietnam'], ans: 2 },
+            { flags: ['brunei','timorLeste','philippines','myanmar'], q: 'Manakah urutan yang BENAR sesuai gambar di atas?', opts: ['Brunei Darussalam, Timor Leste, Filipina, Vietnam','Brunei Darussalam, Filipina, Timor Leste, Myanmar','Malaysia, Timor Leste, Filipina, Myanmar','Brunei Darussalam, Timor Leste, Filipina, Myanmar'], ans: 3 },
+            { flags: ['myanmar','laos','thailand','vietnam'], q: 'Manakah urutan yang BENAR sesuai gambar di atas?', opts: ['Myanmar, Laos, Thailand, Vietnam','Vietnam, Laos, Thailand, Myanmar','Myanmar, Kamboja, Thailand, Vietnam','Laos, Myanmar, Thailand, Vietnam'], ans: 0 },
+        ];
+        
+        if(currentLevel===1) allQuestions=[...level1]; 
+        else if(currentLevel===2) allQuestions=[...level2]; 
+        else allQuestions=[...level3]; 
+        currentQ=0; 
+        showQuestion(); 
+    }
+
     function showQuestion() {
-        if(currentQ>=allQuestions.length) { currentLevel++; if(currentLevel>3) { showResult(); return; } showLevelSplash(); return; }
-        answered=false; const q=allQuestions[currentQ]; let prevTotal=0; if(currentLevel===2) prevTotal=level1.length; else if(currentLevel===3) prevTotal=level1.length+level2.length; const globalIdx=prevTotal+currentQ+1;
+        if(currentQ>=allQuestions.length) { 
+            currentLevel++; 
+            if(currentLevel>3) { 
+                showResult(); 
+                return; 
+            } 
+            showLevelSplash(); 
+            return; 
+        }
+        answered=false; 
+        const q=allQuestions[currentQ]; 
+        let prevTotal=0; 
+        if(currentLevel===2) prevTotal=10; 
+        else if(currentLevel===3) prevTotal=25; 
+        const globalIdx=prevTotal+currentQ+1;
         document.getElementById('qProgress').textContent=`Soal ${globalIdx}/${totalQuestions}`;
         document.getElementById('qScore').textContent=`Skor: ${score}`;
         document.getElementById('progressFill').style.width=`${(globalIdx/totalQuestions)*100}%`;
         let flagHtml='';
         if(q.flag) flagHtml=`<img src="${flagUrls[q.flag]}" alt="Flag" class="flag-image" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22174%22 viewBox=%220 0 190 110%22%3E%3Crect fill=%22%23ccc%22 width=%22190%22 height=%22110%22/%3E%3C/svg%3E'">`;
-        else if(q.flags&&q.flags.length>0) { flagHtml='<div class="flag-grid">'; q.flags.forEach((f,idx)=>{ const numberHtml=(currentLevel===3)?`<div class="order-number">${idx+1}</div>`:''; flagHtml+=`<div class="flag-grid-item">${numberHtml}<img src="${flagUrls[f]}" alt="Flag" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22150%22 height=%2287%22 viewBox=%220 0 190 110%22%3E%3Crect fill=%22%23ccc%22 width=%22190%22 height=%22110%22/%3E%3C/svg%3E'"></div>`; }); flagHtml+='</div>'; }
+        else if(q.flags&&q.flags.length>0) { 
+            flagHtml='<div class="flag-grid">'; 
+            q.flags.forEach((f,idx)=>{ 
+                const numberHtml=(currentLevel===3)?`<div class="order-number">${idx+1}</div>`:''; 
+                flagHtml+=`<div class="flag-grid-item">${numberHtml}<img src="${flagUrls[f]}" alt="Flag" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22150%22 height=%2287%22 viewBox=%220 0 190 110%22%3E%3Crect fill=%22%23ccc%22 width=%22190%22 height=%22110%22/%3E%3C/svg%3E'"></div>`; 
+            }); 
+            flagHtml+='</div>'; 
+        }
         document.getElementById('flagDisplay').innerHTML=flagHtml;
         document.getElementById('qText').textContent=q.q;
         document.getElementById('optionsContainer').innerHTML=q.opts.map((opt,i)=>`<button class="option-btn w-full text-left px-5 py-4 rounded-xl border-2 font-semibold" onclick="selectAnswer(${i})"><span class="text-lg font-bold" style="color: #00A86B;">${String.fromCharCode(65+i)}.</span> ${opt}</button>`).join('');
         showSlide('slide-question');
     }
+
     function selectAnswer(idx) {
-        if(answered) return; answered=true; const q=allQuestions[currentQ]; const btns=document.querySelectorAll('.option-btn');
-        if(idx===q.ans) { btns[idx].classList.add('correct'); score++; }
-        else { btns[idx].classList.add('wrong'); btns[q.ans].classList.add('correct'); wrongList.push({q:q.q,correct:q.opts[q.ans],yours:q.opts[idx]}); }
+        if(answered) return; 
+        answered=true; 
+        const q=allQuestions[currentQ]; 
+        const btns=document.querySelectorAll('.option-btn');
+        if(idx===q.ans) { 
+            btns[idx].classList.add('correct'); 
+            score++; 
+        }
+        else { 
+            btns[idx].classList.add('wrong'); 
+            btns[q.ans].classList.add('correct'); 
+            wrongList.push({q:q.q,correct:q.opts[q.ans],yours:q.opts[idx]}); 
+        }
         setTimeout(()=>{ currentQ++; showQuestion(); },1200);
     }
+
     function showResult() {
         const namaVal=document.getElementById('nama').value.trim();
         const pct=Math.round((score/totalQuestions)*100);
+        const endTime = Date.now();
+        const duration = Math.floor((endTime - startTime) / 1000);
+        const minutes = Math.floor(duration / 60);
+        const seconds = duration % 60;
+        const waktuStr = `${minutes}m ${seconds}s`;
+
         document.getElementById('resultName').textContent=`Selamat, ${namaVal}! 🎊`;
         document.getElementById('finalScore').textContent=`${score}/${totalQuestions}`;
         document.getElementById('scorePercentage').textContent=`${pct}% Benar`;
-        let aff=''; if(pct===100) aff='🌟 Sempurna! Kamu adalah master bendera ASEAN! 🏆'; else if(pct>=80) aff='🎯 Luar biasa! Kamu sangat menguasai bendera negara ASEAN! 💪✨'; else if(pct>=60) aff='👏 Bagus! Terus belajar dan kamu akan semakin mahir! 🚀'; else if(pct>=40) aff='💪 Lumayan! Semangat terus belajar bendera-bendera dunia! 🌍'; else aff='🌈 Jangan menyerah! Setiap percobaan adalah kesempatan untuk belajar lebih baik! 🎯';
+        
+        let aff=''; 
+        if(pct===100) aff='🌟 Sempurna! Kamu adalah master bendera ASEAN! 🏆'; 
+        else if(pct>=80) aff='🎯 Luar biasa! Kamu sangat menguasai bendera negara ASEAN! 💪✨'; 
+        else if(pct>=60) aff='👏 Bagus! Terus belajar dan kamu akan semakin mahir! 🚀'; 
+        else if(pct>=40) aff='💪 Lumayan! Semangat terus belajar bendera-bendera dunia! 🌍'; 
+        else aff='🌈 Jangan menyerah! Setiap percobaan adalah kesempatan untuk belajar lebih baik! 🎯';
         document.getElementById('affirmation').textContent=aff;
 
-        // === KIRIM KE GOOGLE SHEET ===
-        // Link ini memakai URL Apps Script yang sudah ada di kode kamu.
-        // Kalau kamu deploy Apps Script baru, ganti isi tanda kutip di bawah dengan Web App URL terbaru.
-        const urlAppsScript = "https://script.google.com/macros/s/AKfycbyY6RGa36XmqYox3B5pQ03HJOVR3zs72d9eqiBCrsaMgIVUBB-Fk9XhBpkh35VEpzba/exec";
+        // Kirim ke Google Sheet jika ada URL
+        if(appsScriptUrl) {
+            fetch(appsScriptUrl, {
+                method: "POST",
+                mode: "no-cors",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    nama: namaVal,
+                    jurusan: document.getElementById('jurusan').value.trim(),
+                    angkatan: document.getElementById('angkatan').value.trim(),
+                    benar: score,
+                    salah: totalQuestions - score,
+                    skor: `${score}/${totalQuestions}`,
+                    waktu: waktuStr
+                })
+            }).then(r => console.log('✅ Data terkirim ke Google Sheet')).catch(err => console.log('⚠️ Gagal kirim:', err));
+        }
 
-        fetch(urlAppsScript, {
-            method: "POST",
-            mode: "no-cors",
-            headers: {
-                "Content-Type": "text/plain"
-            },
-            body: JSON.stringify({
-                nama: namaVal,
-                jurusan: document.getElementById('jurusan').value.trim(),
-                angkatan: document.getElementById('angkatan').value.trim(),
-                benar: score,
-                salah: totalQuestions - score,
-                skor: `${score}/${totalQuestions}`
-            })
-        }).catch(err => console.error("Gagal kirim:", err));
-
-        let wrongHtml=''; if(wrongList.length>0) { wrongHtml='<div class="bg-gradient-to-br from-red-50 to-red-100 rounded-xl p-5 border-2 border-red-200"><h3 class="font-bold text-red-700 mb-3 text-lg">📝 Jawaban yang Salah:</h3><div class="space-y-3 text-sm">'; wrongList.slice(0,5).forEach(w=>{ wrongHtml+=`<div class="bg-white rounded-lg p-3 border-l-4 border-red-500"><p class="text-gray-800 font-semibold mb-1">${w.q}</p><p class="text-red-600 text-sm">❌ Jawabanmu: ${w.yours}</p><p class="text-emerald-600 text-sm">✅ Jawaban benar: ${w.correct}</p></div>`; }); if(wrongList.length>5) wrongHtml+=`<p class="text-gray-600 text-center mt-2 italic">... dan ${wrongList.length-5} jawaban lainnya</p>`; wrongHtml+='</div></div>'; }
+        let wrongHtml=''; 
+        if(wrongList.length>0) { 
+            wrongHtml='<div class="bg-gradient-to-br from-red-50 to-red-100 rounded-xl p-5 border-2 border-red-200"><h3 class="font-bold text-red-700 mb-3 text-lg">📝 Jawaban yang Salah:</h3><div class="space-y-3 text-sm">'; 
+            wrongList.slice(0,5).forEach(w=>{ 
+                wrongHtml+=`<div class="bg-white rounded-lg p-3 border-l-4 border-red-500"><p class="text-gray-800 font-semibold mb-1">${w.q}</p><p class="text-red-600 text-sm">❌ Jawabanmu: ${w.yours}</p><p class="text-emerald-600 text-sm">✅ Jawaban benar: ${w.correct}</p></div>`; 
+            }); 
+            if(wrongList.length>5) wrongHtml+=`<p class="text-gray-600 text-center mt-2 italic">... dan ${wrongList.length-5} jawaban lainnya</p>`; 
+            wrongHtml+='</div></div>'; 
+        }
         document.getElementById('wrongAnswers').innerHTML=wrongHtml;
         if(pct>=80) createConfetti();
         showSlide('slide-result');
     }
-    function resetQuiz() { document.getElementById('nama').value=''; document.getElementById('jurusan').value=''; document.getElementById('angkatan').value=''; currentLevel=1; currentQ=0; score=0; wrongList=[]; answered=false; showSlide('slide-register'); }
-    function createConfetti() { for(let i=0;i<30;i++){ const conf=document.createElement('div'); conf.className='confetti'; conf.textContent=['🎉','🎊','⭐','🏆','🌟'][Math.floor(Math.random()*5)]; conf.style.left=Math.random()*100+'%'; conf.style.top='-10px'; document.body.appendChild(conf); setTimeout(()=>conf.remove(),3000); } }
+
+    function resetQuiz() { 
+        document.getElementById('nama').value=''; 
+        document.getElementById('jurusan').value=''; 
+        document.getElementById('angkatan').value=''; 
+        currentLevel=1; 
+        currentQ=0; 
+        score=0; 
+        wrongList=[]; 
+        answered=false; 
+        showSlide('slide-register'); 
+    }
+
+    function createConfetti() { 
+        for(let i=0;i<30;i++){ 
+            const conf=document.createElement('div'); 
+            conf.className='confetti'; 
+            conf.textContent=['🎉','🎊','⭐','🏆','🌟'][Math.floor(Math.random()*5)]; 
+            conf.style.left=Math.random()*100+'%'; 
+            conf.style.top='-10px'; 
+            document.body.appendChild(conf); 
+            setTimeout(()=>conf.remove(),3000); 
+        } 
+    }
+
+    // Show admin page on load
+    window.addEventListener('load', () => {
+        showSlide('slide-admin');
+    });
 </script>
 </body>
 </html>
